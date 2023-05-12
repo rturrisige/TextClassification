@@ -1,8 +1,6 @@
 import json
 import pandas as pd
-import numpy as np
 # NLP processing packages:
-import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
 import en_core_sci_lg
 import string
@@ -10,7 +8,6 @@ from tqdm import tqdm
 import sys, os
 sys.path.append(os.getcwd() + '/')
 from utilities import *
-from scipy import stats
 
 ################
 # DATA READING #
@@ -63,8 +60,34 @@ print('Categories with less thant 250 papers are removed.\n')
 print('Final corpus:')
 data.head()
 
-print('\n N. of texts:', data.shape[0])
+print('\nN. of texts:', data.shape[0])
 print('')
+
+## Abstract analysis
+
+# remove space symbols from text
+data['abstract'] = data['abstract'].str.replace('\n', ' ')
+data['abstract'] = data['abstract'].str.replace('\s', ' ', regex=True)
+
+abstract_lengths = [len(t.split()) for t in data['abstract']]
+tokeep = [i for i in range(len(abstract_lengths)) if abstract_lengths[i] > 30]
+
+data = data.iloc[tokeep]
+abstract_lengths = np.array(abstract_lengths)[tokeep]
+print('Too short abstracts are removed.')
+
+plt.figure()
+plt.hist(np.sort(abstract_lengths), bins=20)
+plt.xlabel('N. of words')
+plt.ylabel('N. of papers')
+plt.savefig(data_path + 'abstract_length_distribution_from' + str(min_year) + '.png')
+plt.close()
+
+abstract_statistics = pd.DataFrame(abstract_lengths).describe()
+print(abstract_statistics)
+abstract_statistics.to_csv(data_path + 'abstract_length_statistics_data_from' + str(min_year) + '.csv')
+
+
 
 #################
 # CREATE LABELS #
@@ -107,24 +130,6 @@ plot_multiple_categories(nlabel, counts, data_path, min_year)
 # ##################
 
 print('Abstract processing...')
-
-# remove space symbols from text
-data['abstract'] = data['abstract'].str.replace('\n', ' ')
-data['abstract'] = data['abstract'].str.replace('\s', ' ', regex=True)
-
-# Abstract analysis
-sentence_lengths = [len(t.split()) for t in data['abstract']]
-sentence_lengths.sort()
-plt.figure()
-plt.hist(sentence_lengths, bins=20)
-plt.xlabel('N. of words')
-plt.ylabel('N. of papers')
-plt.savefig(data_path + 'abstract_length_distribution_from' + str(min_year) + '.png')
-plt.close()
-
-abstract_statistics = pd.DataFrame(sentence_lengths).describe()
-print(abstract_statistics)
-abstract_statistics.to_csv(data_path + 'abstract_length_statistics_data_from' + str(min_year) + '.csv')
 
 # Lemmatization
 parser = en_core_sci_lg.load()  # specific package for scientific papers
