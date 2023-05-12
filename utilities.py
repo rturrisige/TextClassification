@@ -66,7 +66,7 @@ def scibert_encode(data, tokenizer, max_length=100):
             add_special_tokens=True,
             truncation=True,
             max_length=max_length,
-            padding=True,
+            padding='max_length',
             return_attention_mask=True,
         )
         input_ids.append(encoded['input_ids'])

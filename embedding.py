@@ -1,6 +1,4 @@
-import json
 import pandas as pd
-import numpy as np
 from transformers import AutoTokenizer, TFAutoModel
 import tensorflow as tf
 import sys, os
@@ -37,7 +35,7 @@ for id, atm in input_dataset:
     output = model.predict([id, atm])[0][:, 0, :]
     bert_embedding = np.concatenate([bert_embedding, output], 0) if bert_embedding.any() else output
 
-np.save(data_path + 'bert_embedding_from' + str(min_year) + '.npy', bert_embedding)
+np.save(data_path + 'scibert_embedding_from' + str(min_year) + '.npy', bert_embedding)
 ##
 
 from sklearn.decomposition import PCA
@@ -46,4 +44,4 @@ pca = PCA(n_components=0.95, random_state=42)  # Keep 95% of the variance
 embedding = pca.fit_transform(bert_embedding)
 print('Embedding shape:', embedding.shape)
 
-np.save(data_path + 'PCA_bert_embedding_from' + str(min_year) + '.npy', embedding)
+np.save(data_path + 'PCA_scibert_embedding_from' + str(min_year) + '.npy', embedding)
