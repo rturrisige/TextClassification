@@ -102,7 +102,7 @@ unique_categories_dict = {}
 for i, c in enumerate(unique_categories):
     unique_categories_dict[c] = i
 
-np.save(data_path + 'unique_categories_dictionary_from' + str(min_year) + '.py', unique_categories_dict)
+np.save(data_path + 'unique_categories_dictionary_from' + str(min_year) + '.npy', unique_categories_dict)
 
 categories_labels = []
 for paper_categories in categories_list:

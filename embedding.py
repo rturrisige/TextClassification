@@ -14,7 +14,7 @@ from utilities import *
 data_path = str(sys.argv[1]) # '/home/rosannaturrisi/storage/NLP/'
 min_year = 2022
 data = pd.read_csv(data_path + 'preprocessed_data_from' + str(min_year) + '.csv')
-unique_categories_dict = np.load(data_path + 'unique_categories_dictionary_from' + str(min_year) + '.py', )
+unique_categories_dict = np.load(data_path + 'unique_categories_dictionary_from' + str(min_year) + '.npy', )
 
 
 ####################
