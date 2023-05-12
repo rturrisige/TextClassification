@@ -10,6 +10,7 @@ from tqdm import tqdm
 import sys, os
 sys.path.append(os.getcwd() + '/')
 from utilities import *
+from scipy import stats
 
 ################
 # DATA READING #
@@ -52,19 +53,18 @@ print('Kept information:', keep_col)
 # remove duplicates and withdrawn papers
 data = data[data['abstract'].str.contains('paper has been withdrawn') == False]
 data.drop_duplicates(['abstract',], inplace=True)
-print('Duplicates and withdrawn papers are removed.')
+print('Duplicates and withdrawn papers are removed.\n')
 
 # remove categories with few papers
 shortlisted_categories = data['categories'].value_counts().reset_index(name="count").query("count > 250")["index"].tolist()
 data = data[data["categories"].isin(shortlisted_categories)].reset_index(drop=True)
-print('Categories with less thant 250 papers are removed.')
+print('Categories with less thant 250 papers are removed.\n')
 
 print('Final corpus:')
 data.head()
 
-print('N. of texts:', data.shape[0])
-print('Abstract description:')
-data['abstract'].describe(include='all')
+print('\n N. of texts:', data.shape[0])
+print('')
 
 #################
 # CREATE LABELS #
@@ -73,6 +73,7 @@ data['abstract'].describe(include='all')
 categories_list = [x.split(' ') for x in data['categories']]
 unique_categories = list(set([i for l in categories_list for i in l]))
 print('N. of categories:', len(unique_categories))
+print('')
 
 unique_categories_dict = {}
 for i, c in enumerate(unique_categories):
@@ -115,7 +116,15 @@ data['abstract'] = data['abstract'].str.replace('\s', ' ', regex=True)
 sentence_lengths = [len(t.split()) for t in data['abstract']]
 sentence_lengths.sort()
 plt.figure()
-plt.hist(sentence_lengths, bins=10)
+plt.hist(sentence_lengths, bins=20)
+plt.xlabel('N. of words')
+plt.ylabel('N. of papers')
+plt.savefig(data_path + 'abstract_length_distribution_from' + str(min_year) + '.png')
+plt.close()
+
+abstract_statistics = pd.DataFrame(sentence_lengths).describe()
+print(abstract_statistics)
+abstract_statistics.to_csv(data_path + 'abstract_length_statistics_data_from' + str(min_year) + '.csv')
 
 # Lemmatization
 parser = en_core_sci_lg.load()  # specific package for scientific papers
