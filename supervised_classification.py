@@ -53,8 +53,8 @@ tokenizer = AutoTokenizer.from_pretrained('allenai/scibert_scivocab_uncased')
 model = TFAutoModel.from_pretrained('allenai/scibert_scivocab_uncased', from_pt=True)
 
 X = list(data['processed_abstract'])
-X = X[:1000]
-categories_labels = categories_labels[:1000]
+X = X[:100]
+categories_labels = categories_labels[:100]
 
 input_ids, attention_masks = scibert_encode(X, tokenizer, max_length=157)
 del X
