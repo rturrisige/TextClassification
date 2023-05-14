@@ -53,8 +53,7 @@ tokenizer = AutoTokenizer.from_pretrained('allenai/scibert_scivocab_uncased')
 model = TFAutoModel.from_pretrained('allenai/scibert_scivocab_uncased', from_pt=True)
 
 X = list(data['processed_abstract'])
-X = X[:100]
-categories_labels = categories_labels[:100]
+
 
 input_ids, attention_masks = scibert_encode(X, tokenizer, max_length=157)
 del X
@@ -82,7 +81,7 @@ np.save(data_path + 'scibert_test_embedding_from' + str(min_year) + '.npy', bert
 np.save(data_path + 'scibert_cls_test_embedding_from' + str(min_year) + '.npy', bert_cls_embedding)
 
 ##
-
+'''
 classification_model = Classification_model(config, model)
 classification_model.summary()
 
@@ -90,7 +89,7 @@ classification_model.compile(Adam(learning_rate=config.lr), loss=config.criterio
 
 es = EarlyStopping(monitor='val_accuracy', mode='max', verbose=1, patience=config.patience)
 
-history = classification_model.fit([token_train,mask_train], y_train, validation_split=config.n_validation,
+history = classification_model.fit(token_train,mask_train, y_train, validation_split=config.n_validation,
                                    epochs=config.num_epochs,
                                    batch_size=config.batch_size, callbacks=[es])
 
@@ -119,4 +118,4 @@ plt.legend(['train', 'val'], loc='upper left')
 plt.savefig(data_path + 'tuning_results.png')
 
 test_loss, test_accuracy = classification_model.evaluate([token_test, mask_test], y_test)
-print('Testing loss:', test_loss, 'Testing accuracy:', test_accuracy)
+print("Testing loss:", test_loss, "Testing accuracy:", test_accuracy)'''
