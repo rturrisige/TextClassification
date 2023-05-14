@@ -19,11 +19,9 @@ data = pd.read_csv(data_path + 'preprocessed_data_from' + str(min_year) + '.csv'
 unique_categories_dict = np.load(data_path + 'unique_categories_dictionary_from' + str(min_year) + '.npy',
                                  allow_pickle=True)
 
-categories_labels = np.array([])
-for i in range(data['labels'].shape[0]):
-    l = np.array(ast.literal_eval(data['labels'].values[i]))[None, :]
-    categories_labels = np.concatenate([categories_labels, l], 0) if categories_labels.any() else l
+categories_labels = np.load(data_path + 'categories_labels.npy')
 
+##
 
 class Configuration(object):
     def __init__(self):
@@ -54,9 +52,10 @@ model = TFAutoModel.from_pretrained('allenai/scibert_scivocab_uncased', from_pt=
 
 X = list(data['processed_abstract'])
 
-
 input_ids, attention_masks = scibert_encode(X, tokenizer, max_length=157)
 del X
+np.save(data_path + 'categories_labels.npy',  categories_labels)
+np.save(data_path + 'ids_atm.npy',  [input_ids, attention_masks])
 
 
 token_train, token_test, mask_train, mask_test, \
@@ -81,15 +80,23 @@ np.save(data_path + 'scibert_test_embedding_from' + str(min_year) + '.npy', bert
 np.save(data_path + 'scibert_cls_test_embedding_from' + str(min_year) + '.npy', bert_cls_embedding)
 
 ##
-'''
-classification_model = Classification_model(config, model)
+
+input_ids = tf.keras.Input(shape=(config.input_size,), dtype='int32')
+attention_masks = tf.keras.Input(shape=(config.input_size,), dtype='int32')
+output = model([input_ids, attention_masks])
+output = output[1]
+output = tf.keras.layers.Dense(config.n_dense, activation='relu')(output)
+output = tf.keras.layers.Dropout(config.dropout)(output)
+output = tf.keras.layers.Dense(config.n_classes, activation='sigmoid')(output)
+classification_model = tf.keras.models.Model(inputs=[input_ids, attention_masks], outputs=output)
+
 classification_model.summary()
 
 classification_model.compile(Adam(learning_rate=config.lr), loss=config.criterion, metrics=['accuracy'])
 
 es = EarlyStopping(monitor='val_accuracy', mode='max', verbose=1, patience=config.patience)
 
-history = classification_model.fit(token_train,mask_train, y_train, validation_split=config.n_validation,
+history = classification_model.fit([token_train, mask_train], y_train, validation_split=config.n_validation,
                                    epochs=config.num_epochs,
                                    batch_size=config.batch_size, callbacks=[es])
 
@@ -118,4 +125,4 @@ plt.legend(['train', 'val'], loc='upper left')
 plt.savefig(data_path + 'tuning_results.png')
 
 test_loss, test_accuracy = classification_model.evaluate([token_test, mask_test], y_test)
-print("Testing loss:", test_loss, "Testing accuracy:", test_accuracy)'''
+print("Testing loss:", test_loss, "Testing accuracy:", test_accuracy)
