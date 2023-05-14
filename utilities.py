@@ -72,3 +72,38 @@ def scibert_encode(data, tokenizer, max_length=100):
         input_ids.append(encoded['input_ids'])
         attention_masks.append(encoded['attention_mask'])
     return np.array(input_ids), np.array(attention_masks)
+
+
+import tensorflow as tf
+
+
+def create_model(embedding_model, config):
+    input_ids = tf.keras.Input(shape=(config.input_size,), dtype='int32')
+    attention_masks = tf.keras.Input(shape=(config.input_size,), dtype='int32')
+    output = embedding_model([input_ids, attention_masks])
+    output = output[1]
+    output = tf.keras.layers.Dense(config.n_dense, activation='relu')(output)
+    output = tf.keras.layers.Dropout(config.dropout)(output)
+    output = tf.keras.layers.Dense(config.n_classes, activation='sigmoid')(output)
+    model = tf.keras.models.Model(inputs=[input_ids, attention_masks], outputs=output)
+    return model
+
+
+class Classification_model(tf.keras.Model):
+  def __init__(self, config, embedding_model):
+    super().__init__()
+    self.embedding_model = embedding_model
+    self.dense1 = tf.keras.layers.Dense(config.n_dense, activation='relu')
+    self.dropout = tf.keras.layers.Dropout(config.dropout)
+    self.dense2 = tf.keras.layers.Dense(config.n_classes, activation='sigmoid')
+
+  def call(self, input_ids, attention_masks, return_embeddings=False):
+    embeddings = self.embedding_model([input_ids, attention_masks])
+    output = embeddings[1]
+    output = self.dense1(output)
+    output = self.dropout(output)
+    output = self.dense2(output)
+    if return_embeddings:
+        return embeddings, output
+    else:
+        return output
