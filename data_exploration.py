@@ -5,7 +5,8 @@ from spacy.lang.en.stop_words import STOP_WORDS
 import en_core_sci_lg
 import string
 from tqdm import tqdm
-import sys, os
+import sys
+import os
 sys.path.append(os.getcwd() + '/')
 from utilities import *
 
@@ -63,7 +64,8 @@ data.head()
 print('\nN. of texts:', data.shape[0])
 print('')
 
-## Abstract analysis
+##
+# #Abstract analysis
 
 # remove space symbols from text
 data['abstract'] = data['abstract'].str.replace('\n', ' ')
@@ -76,12 +78,15 @@ data = data.iloc[tokeep]
 abstract_lengths = np.array(abstract_lengths)[tokeep]
 print('Too short abstracts are removed.')
 
-plt.figure()
-plt.hist(np.sort(abstract_lengths), bins=20)
-plt.xlabel('N. of words')
-plt.ylabel('N. of papers')
-plt.savefig(data_path + 'abstract_length_distribution_from' + str(min_year) + '.png')
-plt.close()
+def plot_wdist(abstract_lengths, format='.png'):
+    plt.figure(figsize=(10, 5))
+    plt.hist(np.sort(abstract_lengths), bins=20)
+    plt.xlabel('Number of words', fontsize=20)
+    plt.ylabel('Number of papers', fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.xticks(fontsize=20)
+    plt.savefig(data_path + 'abstract_length_distribution_from' + str(min_year) + format, bbox_inches='tight')
+
 
 abstract_statistics = pd.DataFrame(abstract_lengths).describe()
 print(abstract_statistics)
@@ -112,14 +117,13 @@ for paper_categories in categories_list:
     categories_labels.append(list(label))
 
 data['labels'] = categories_labels
+np.save(data_path + 'categories_labels.npy', categories_labels)
 
 # LABEL VISUALIZATION
 
 category_count = np.sum(categories_labels, 0)
-plot_all_categories(unique_categories, category_count, data_path, min_year)
-plot_top_categories(unique_categories, category_count, data_path, min_year)
-plot_bottom_categories(unique_categories, category_count, data_path, min_year)
-
+plot_all_categories(unique_categories, category_count, data_path, min_year, format='.pdf')
+plot_top_bottom_categories(unique_categories, category_count, data_path, min_year, format='.pdf')
 multilabel_count = np.sum(categories_labels, 1)
 nlabel, counts = np.unique(multilabel_count, return_counts=True)
 plot_multiple_categories(nlabel, counts, data_path, min_year)

@@ -2,6 +2,7 @@ import pandas as pd
 import sys
 import os
 import ast
+import tensorflow as tf
 from transformers import AutoTokenizer, TFAutoModel
 from sklearn.model_selection import train_test_split
 from keras.optimizers import Adam
@@ -17,7 +18,7 @@ data_path = str(sys.argv[1])  # '/home/rosannaturrisi/storage/NLP/'
 min_year = 2022
 data = pd.read_csv(data_path + 'preprocessed_data_from' + str(min_year) + '.csv')
 unique_categories_dict = np.load(data_path + 'unique_categories_dictionary_from' + str(min_year) + '.npy',
-                                 allow_pickle=True)
+                                 allow_pickle=True).item()
 
 categories_labels = np.load(data_path + 'categories_labels.npy')
 
@@ -31,14 +32,14 @@ class Configuration(object):
         self.n_dense = 32
         self.n_classes = 40
         # Training parameters:
-        self.batch_size = 50
-        self.num_epochs = 200  # maximum number of iterations
-        self.lr = 6e-6  # learning rate
-        self.patience = 3  # patience for early stopping
+        self.batch_size = 32
+        self.num_epochs = 4  # maximum number of iterations
+        self.lr = 2e-5  # learning rate
+        self.patience = 1  # patience for early stopping
         self.criterion = 'categorical_crossentropy'  # loss
         self.n_validation = 0.2  # validation set proportion
         self.n_test = 0.1  # testing set proportion
-        self.dropout = 0.2
+        self.dropout = 0.1
 
 
 config = Configuration()
