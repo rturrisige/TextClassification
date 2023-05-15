@@ -1,8 +1,11 @@
 from matplotlib import pyplot as plt
 import numpy as np
+from sklearn.cluster import KMeans
+from sklearn import metrics
+from sklearn.pipeline import Pipeline
+
 
 # Categories visualization
-
 
 def plot_all_categories(unique_categories, category_count, saver_path, min_year, format='.png'):
     indices = np.argsort(category_count)[::-1]
@@ -79,8 +82,7 @@ def plot_multiple_categories(nlabel, counts, saver_path, min_year):
     plt.savefig(saver_path + 'multiple_categories_from' + str(min_year) + '.png', bbox_inches='tight')
 
 
-# Encoding
-
+# SciBert Tokenizer
 
 def scibert_encode(data, tokenizer, max_length=100):
     input_ids, attention_masks = [], []
@@ -96,3 +98,48 @@ def scibert_encode(data, tokenizer, max_length=100):
         input_ids.append(encoded['input_ids'])
         attention_masks.append(encoded['attention_mask'])
     return np.array(input_ids), np.array(attention_masks)
+
+
+# Embedding visualization
+
+def scatter_one_class(embedding_2D, idx, label):
+    all_others = [i for i in range(embedding_2D.shape[0]) if i not in idx]
+    plt.scatter(embedding_2D[all_others, 0], embedding_2D[all_others, 1], color='darkgrey')
+    plt.scatter(embedding_2D[idx, 0], embedding_2D[idx, 1], color='lightseagreen', label=label)
+    plt.xticks([])
+    plt.yticks([])
+    plt.legend(fontsize=20)
+
+
+def n_most_frequent_categories(categories_labels, n):
+    category_count = np.sum(categories_labels, 0)
+    mf_cat = np.argsort(category_count)[::-1][:n]
+    mf_cat_papers = categories_labels[:, mf_cat]
+    indices = []
+    for n in range(6):
+        indices.append(list(np.where(mf_cat_papers[:, n] == 1)[0]))
+    return indices
+
+
+# Clustering
+
+def find_best_k(X, k_range, random_state=42):
+    """Find the best k via grid search optmizing the Silhouette score."""
+    silhouette_scores = []
+    for k in k_range:
+        kmeans = KMeans(n_clusters=k, n_init=10, random_state=random_state).fit(X)
+        sil = metrics.silhouette_score(X, kmeans.labels_.ravel())
+        print('k=' + str(k) + ', silhouette score=' + str(sil))
+        silhouette_scores.append(sil)
+    print('')
+    return silhouette_scores
+
+def compute_elbow_kmeans(X, k_range):
+    r_seed = 24
+    cluster_errors = []
+    for n_clusters in k_range:
+        pipe_pca_kmean = Pipeline([("cluster", KMeans(n_clusters=n_clusters, random_state=r_seed, verbose=0))])
+        pipe_pca_kmean.fit(X)
+        pipe_pca_kmean.predict(X)
+        cluster_errors.append(pipe_pca_kmean.named_steps["cluster"].inertia_)
+    return cluster_errors
