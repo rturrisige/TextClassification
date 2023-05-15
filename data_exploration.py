@@ -15,6 +15,10 @@ from utilities import *
 # ##############
 
 data_path = str(sys.argv[1]) # '/home/rosannaturrisi/storage/NLP/'
+
+if not os.path.exists(data_path + 'img/'):
+    os.makedirs(data_path + 'img/')
+
 metadata = []
 with open(data_path + "arxiv-metadata-oai-snapshot.json", 'r') as f:
     for line in f:
@@ -85,7 +89,7 @@ def plot_wdist(abstract_lengths, format='.png'):
     plt.ylabel('Number of papers', fontsize=20)
     plt.yticks(fontsize=20)
     plt.xticks(fontsize=20)
-    plt.savefig(data_path + 'abstract_length_distribution_from' + str(min_year) + format, bbox_inches='tight')
+    plt.savefig(data_path + 'img/abstract_length_distribution_from' + str(min_year) + format, bbox_inches='tight')
 
 
 abstract_statistics = pd.DataFrame(abstract_lengths).describe()

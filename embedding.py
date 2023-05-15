@@ -6,6 +6,7 @@ from sklearn.manifold import TSNE
 import ast
 sys.path.append(os.getcwd() + '/')
 from utilities import *
+import tensorflow as tf
 
 ################
 # DATA READING #
@@ -15,7 +16,8 @@ data_path = str(sys.argv[1]) # '/home/rosannaturrisi/storage/NLP/'
 min_year = 2022
 data = pd.read_csv(data_path + 'preprocessed_data_from' + str(min_year) + '.csv')
 categories_labels = np.load(data_path + 'categories_labels.npy')
-
+unique_categories_dict = np.load(data_path + 'unique_categories_dictionary_from' + str(min_year) + '.npy',
+                                 allow_pickle=True).item()
 
 ####################
 # TEXT EMBEDDING   #
@@ -54,33 +56,15 @@ np.save(data_path + 'PCA_scibert_embedding_from' + str(min_year) + '.npy', embed
 tsne = TSNE(random_state=42, init='pca')
 embedding_2D = tsne.fit_transform(embedding)
 
-# most and less frequent category plot on the 2D-projection of the embedding
+# most frequent categories plot on the 2D-projection of the embedding
+indices, cat_names = n_most_frequent_categories(categories_labels,  list(unique_categories_dict.keys()), 6)
 
-def scatter_one_class(embedding_2D, idx, label):
-    all_others = [i for i in range(mf_cat_papers.shape[0]) if i not in idx]
-    plt.scatter(embedding_2D[all_others, 0], embedding_2D[all_others, 1], color='darkgrey')
-    plt.scatter(embedding_2D[idx, 0], embedding_2D[idx, 1], color='lightseagreen', label=label)
-    plt.xticks([])
-    plt.yticks([])
-    plt.legend(fontsize=14)
-
-
-category_count = np.sum(categories_labels, 0)
-
-mf_cat = np.argsort(category_count)[::-1][:6]
-mf_cat_papers = categories_labels[:, mf_cat]
-indices = []
-for n in range(6):
-    indices.append(list(np.where(mf_cat_papers[:, n] == 1)[0]))
-
-label_names = ['1st freq.', '2nd freq.', '3nd freq.', '4th freq.', '5th freq.', '6th freq.']
-
-plt.figure(figsize=(20, 10))
+plt.figure(figsize=(25, 10))
 for i in range(len(indices)):
     plt.subplot(2, 3, i + 1)
-    scatter_one_class(embedding_2D, indices[i], label_names[i])
+    scatter_one_class(embedding, indices[i], cat_names[i])
 
 
-plt.suptitle('TSNE with Subject Category Labels', fontsize=20)
-plt.savefig(data_path + 'Embedding_mostfrequentclass_from' + str(min_year) + '.png', bbox_inches='tight')
+plt.suptitle('TSNE with Subject Category Labels', fontsize=30)
+plt.savefig(data_path + 'img/SciBert_cls_Embedding_mostfrequentclass_from' + str(min_year) + '.png', bbox_inches='tight')
 
