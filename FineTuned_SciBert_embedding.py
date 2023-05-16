@@ -1,8 +1,49 @@
+"""
+This files performs fine-tuning of the pre-trained SciBert model on the subject category classification task.
+Finally, it extracts the last hidden layer of the fine-tuned model as text representation.
+
+INPUT
+data_path, i.e. the path to the folder that contains the arXiv dataset "arxiv-metadata-oai-snapshot.json".
+
+OUTPUT
+y_train.npy: subject category labels of the training set.
+Numpy array of dimension n_train_samples x n_categories. Saved in data_path/finetuning.
+
+y_test.npy: subject category labels of the test set.
+Numpy array of dimension n_test_samples x n_categories. Saved in data_path/finetuning.
+
+tuned_scibert_train_embedding_from2022.npy: Fine-Tuned SciBert (T) embedding of the training set.
+Numpy array of dimension n_train_sapmles x 768. Saved in data_path/finetuning.
+
+tuned_scibert_train_cls_embedding_from2022.npy: Fine-Tuned SciBert (CLS) embedding of the training set.
+Numpy array of dimension n_train_sapmles x 768. Saved in data_path/finetuning.
+
+tuned_scibert_test_embedding_from2022.npy: Fine-Tuned SciBert (T) embedding of the testing set.
+Numpy array of dimension n_test_sapmles x 768. Saved in data_path/finetuning.
+
+tuned_scibert_test_cls_embedding_from2022.npy: Fine-Tuned SciBert (CLS) embedding of the testing set.
+Numpy array of dimension n_test_sapmles x 768. Saved in data_path/finetuning.
+
+train_tuned_Embedding_mostfrequentclass_from2022.png: 2D projection of Fine-Tuned SciBert (T) embedding of the training
+set, where samples belonging to the 6 most frequent categories are labelled in green (Fig. 2.7 of the report).
+Image (png format). Saved in data_path/img.
+
+train_tuned_csl_Embedding_mostfrequentclass_from2022.png: 2D projection of Fine-Tuned SciBert (CLS) embedding of the
+training set, where samples belonging to the 6 most frequent categories are labelled in green (Fig. 2.8 of the report).
+Image (png format). Saved in data_path/img.
+
+test_tuned_Embedding_mostfrequentclass_from2022.png: 2D projection of Fine-Tuned SciBert (T) embedding of the testing
+set, where samples belonging to the 6 most frequent categories are labelled in green (Fig. 2.9 of the report).
+Image (png format). Saved in data_path/img.
+
+test_tuned_csl_Embedding_mostfrequentclass_from2022.png: 2D projection of Fine-Tuned SciBert (CLS) embedding of the
+testing set, where samples belonging to the 6 most frequent categories are labelled in green (Fig. 2.10 of the report).
+Image (png format). Saved in data_path/img.
+"""
+
 import pandas as pd
 import sys
 import os
-from sklearn.manifold import TSNE
-import ast
 import tensorflow as tf
 from transformers import AutoTokenizer, TFAutoModel
 from sklearn.model_selection import train_test_split
@@ -15,7 +56,7 @@ from utilities import *
 # DATA READING #
 # ##############
 
-data_path = str(sys.argv[1])  # '/home/rosannaturrisi/storage/NLP/'
+data_path = str(sys.argv[1])
 
 if not os.path.exists(data_path + 'finetuning/'):
     os.makedirs(data_path + 'finetuning/')
@@ -27,11 +68,11 @@ unique_categories_dict = np.load(data_path + 'unique_categories_dictionary_from'
 
 categories_labels = np.load(data_path + 'categories_labels.npy')
 
+
 ##
 
 class Configuration(object):
     def __init__(self):
-        # self.nexp = int(sys.argv[1])
         # Network parameters
         self.input_size = 157
         self.n_dense = 32
