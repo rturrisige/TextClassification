@@ -235,27 +235,3 @@ for i in range(len(indices)):
 
 plt.suptitle('TSNE with Subject Category Labels', fontsize=30)
 plt.savefig(data_path + 'img/test_tuned_cls_Embedding_mostfrequentclass_from' + str(min_year) + '.png', bbox_inches='tight')
-
-# All
-
-tuned_bert_embedding_2D = tsne.fit_transform(np.concatenate([train_tuned_bert_embedding, test_tuned_bert_embedding], 0))
-tuned_bert_cls_embedding_2D = tsne.fit_transform(np.concatenate([train_tuned_bert_cls_embedding, test_tuned_bert_cls_embedding], 0))
-
-
-plt.figure(figsize=(25, 10))
-for i in range(len(indices)):
-    plt.subplot(2, 3, i + 1)
-    scatter_one_class(tuned_bert_embedding_2D, indices[i], cat_names[i])
-
-
-plt.suptitle('TSNE with Subject Category Labels', fontsize=30)
-plt.savefig(data_path + 'img/tuned_Embedding_mostfrequentclass_from' + str(min_year) + '.png', bbox_inches='tight')
-
-plt.figure(figsize=(25, 10))
-for i in range(len(indices)):
-    plt.subplot(2, 3, i + 1)
-    scatter_one_class(tuned_bert_cls_embedding_2D, indices[i], cat_names[i])
-
-
-plt.suptitle('TSNE with Subject Category Labels', fontsize=30)
-plt.savefig(data_path + 'img/tuned_cls_Embedding_mostfrequentclass_from' + str(min_year) + '.png', bbox_inches='tight')
