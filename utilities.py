@@ -1,9 +1,27 @@
+"""
+This file contains useful functions related to categories visualisation, embedding creation and visualisation,
+clustering training and evaluation. It also includes a dictionary that maps the arXiv category labels (e.g., 'astro-ph')
+into the corresponding subject name (e.g., 'Astrophysics').
+"""
+
 from matplotlib import pyplot as plt
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn import metrics
 from sklearn.pipeline import Pipeline
+import seaborn as sns
+from sklearn.manifold import TSNE
 
+# Abstract length
+
+def plot_wdist(data_path, abstract_lengths, min_year=2022, format='.png'):
+    plt.figure(figsize=(10, 5))
+    plt.hist(np.sort(abstract_lengths), bins=20)
+    plt.xlabel('Number of words', fontsize=20)
+    plt.ylabel('Number of papers', fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.xticks(fontsize=20)
+    plt.savefig(data_path + 'img/abstract_length_distribution_from' + str(min_year) + format, bbox_inches='tight')
 
 # Categories visualization
 
@@ -82,6 +100,7 @@ def plot_multiple_categories(nlabel, counts, saver_path, min_year):
     plt.savefig(saver_path + 'img/multiple_categories_from' + str(min_year) + '.png', bbox_inches='tight')
 
 
+##
 # SciBert Tokenizer
 
 def scibert_encode(data, tokenizer, max_length=100):
@@ -100,6 +119,7 @@ def scibert_encode(data, tokenizer, max_length=100):
     return np.array(input_ids), np.array(attention_masks)
 
 
+##
 # Embedding visualization
 
 def scatter_one_class(embedding_2D, idx, label):
@@ -121,7 +141,7 @@ def n_most_frequent_categories(categories_labels, unique_category, n):
         indices.append(list(np.where(mf_cat_papers[:, n] == 1)[0]))
     return indices, names
 
-
+##
 # Clustering
 
 def find_best_k(X_train, X_val, k_range, random_state=42):
@@ -147,7 +167,53 @@ def compute_elbow_kmeans(X_train, X_val, k_range):
         cluster_errors.append(pipe_pca_kmean.named_steps["cluster"].inertia_)
     return cluster_errors
 
+
+# cluster visualization
+
+def cluster_visualization(test_embedding, test_pred, data_path, name, kbest, min_year=2022):
+    tsne = TSNE(random_state=42, init='pca')
+    embedding_2D = tsne.fit_transform(test_embedding)
+
+    # plot
+    plt.figure(figsize=(16, 9))
+    sns.set(rc={'figure.figsize': (15, 15)})
+    palette = sns.hls_palette(kbest, l=.4, s=.9)  # colors
+    sns.scatterplot(x=embedding_2D[:,0], y=embedding_2D[:,1], hue=test_pred, legend='full',
+                    palette=palette)
+
+    plt.title('K-Means classes', fontsize=30)
+    plt.xticks([])
+    plt.yticks([])
+    plt.savefig(data_path + 'img/' + name + '_kmeans_k=' + str(kbest) + '_TSNE_from' + str(min_year) + '.png',
+                bbox_inches='tight')
+
+
+def plot_categories_in_clusters(test_pred, y_test, data_path, name, kbest, nrow=8, ncol=4):
+    plt.figure(figsize=(18, 20))
+    i = 1
+    for c in range(max(test_pred) + 1):
+        papers_c = np.where(test_pred == c)[0]
+        labels_c = np.array(y_test)[papers_c]
+        count_c = np.sum(labels_c, 0)
+        plt.subplot(nrow, ncol, i)
+        plt.title('Cluster ' + str(i-1), fontsize=20)
+        plt.bar(np.arange(1, 41), list(count_c))
+        if (i-1) % ncol == 0:
+            plt.yticks(fontsize=20)
+            plt.ylabel('N. papers', fontsize=20, labelpad=10)
+        if i > ((nrow-1)*ncol) :
+            plt.xticks(np.arange(0, 41, 10), fontsize=20)
+            plt.xlabel('Subject Category', fontsize=20, labelpad=10)
+        else:
+            plt.xticks(np.arange(0, 41, 10), [])
+        i += 1
+
+    plt.subplots_adjust(hspace=0.4, wspace=0.2)
+    plt.savefig(data_path + 'img/' + name + '_kmeans_k='+str(kbest) + '_count_categories.png', bbox_inches='tight')
+
 ##
+# Label-to-category map
+
 
 category_map = {'astro-ph': 'Astrophysics',
                 'astro-ph.CO': 'Cosmology and Nongalactic Astrophysics',
