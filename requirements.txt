@@ -1,0 +1,20 @@
+Python base packages:
+json
+pandas
+numpy
+matplotlib
+seaboarn
+scikit-learn
+kneed
+os
+sys
+
+NLP python packages:
+spacy
+en_core_sci_lg
+(can be downloaded from https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_core_sci_lg-0.4.0.tar.gz)
+
+DL python libraries:
+pytorch
+tensorflow
+transformers
