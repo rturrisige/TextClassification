@@ -1,3 +1,36 @@
+"""
+This file selects a subset of the arXiv dataset (papers published after 2022),
+performs category labels and abstract lenght analysis, and abstract processing.
+
+INPUT
+data_path, i.e. the path to the folder that contains the arXiv dataset "arxiv-metadata-oai-snapshot.json".
+
+OUTPUT
+categories_labels.npy: the arXiv category labels of the selected subset.
+Numpy array of dimension n_sample x n_categories. Saved in data_path.
+
+unique_categories_dictionary_from2022.npy: a dictionary mapping the subject category name into the label.
+Numpy dictionary with n_categories elements. Saved in data_path.
+
+abstract_length_statistics_data_from2022.csv: statistic description of the abstracts lenght.
+Pandas data frame. Saved in data_path.
+
+preprocessed_data_from2022.csv: dataset with pre-processed abstracts and categories labels.
+Pandas data frame of dimension n_sample x n_features. Saved in data_path.
+
+abstract_length_distribution_from2022.pdf: distribution of abstract length (Fig. 2.1 in the report).
+Img (pdf format). Saved in data_path/img.
+
+all_categories_from2022.pdf: Frequency of all subject categories (Fig. 2.2 in the report).
+Img (pdf format). Saved in data_path/img.
+
+top6_bottom10_categories_from2022.pdf: number of papers in the mostly and less frequent subject categories (Fig. 2.3 in the report),
+Img (pdf format). Saved in data_path/img.
+
+multiple_categories_from2022.pdf: number of papers with one or more categories associated (Fig. 2.4 in the report).
+Img (pdf format). Saved in data_path/img.
+"""
+
 import json
 import pandas as pd
 # NLP processing packages:
@@ -14,7 +47,7 @@ from utilities import *
 # DATA READING #
 # ##############
 
-data_path = str(sys.argv[1]) # '/home/rosannaturrisi/storage/NLP/'
+data_path = str(sys.argv[1])
 
 if not os.path.exists(data_path + 'img/'):
     os.makedirs(data_path + 'img/')
@@ -82,21 +115,12 @@ data = data.iloc[tokeep]
 abstract_lengths = np.array(abstract_lengths)[tokeep]
 print('Too short abstracts are removed.')
 
-def plot_wdist(abstract_lengths, format='.png'):
-    plt.figure(figsize=(10, 5))
-    plt.hist(np.sort(abstract_lengths), bins=20)
-    plt.xlabel('Number of words', fontsize=20)
-    plt.ylabel('Number of papers', fontsize=20)
-    plt.yticks(fontsize=20)
-    plt.xticks(fontsize=20)
-    plt.savefig(data_path + 'img/abstract_length_distribution_from' + str(min_year) + format, bbox_inches='tight')
-
 
 abstract_statistics = pd.DataFrame(abstract_lengths).describe()
 print(abstract_statistics)
 abstract_statistics.to_csv(data_path + 'abstract_length_statistics_data_from' + str(min_year) + '.csv')
 
-
+plot_wdist(data_path, abstract_lengths, format='.pdf')
 
 #################
 # CREATE LABELS #
