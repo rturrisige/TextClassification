@@ -1,4 +1,4 @@
-# TEXT CLASSIFICATION INTO AN UNKNOWN NUMBER OF CATEGORIES
+# Beyond original Research Articles Categorization via NLP
 ### Rosanna Turrisi
 
 [![Python 3.9.15](https://img.shields.io/badge/python-3.9.15-blue.svg)](https://www.python.org/downloads/release/python-392/)
