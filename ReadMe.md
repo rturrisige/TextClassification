@@ -20,6 +20,9 @@ This is rich corpus of about 2 M articles, including publication information suc
 For computational reasons, a subset of articles published in 2023 was selected based on the journal-ref information. Additionally, certain filtering criteria were applied to ensure data quality.
 Duplicated and withdrawn papers were removed from the dataset. Categories with a small number of papers, specifically those containing less than 250 articles, were also excluded. 
 
+## FULL PAPER 
+The full article is available in the Turrisi.pdf file.
+
 ## FOLDER CONTENT
 
 - `run.sh` in which an example of how to run the whole pipeline in shown;
